@@ -4,6 +4,9 @@ Repository for Northwestern University MSDS Capstone Individual Project - Ensemb
 
 This project highlights how to leverage the FinRL Python package to build 3 types of Reinforcment Learning Agents: DDPG, TD3, SAC. Each of these models are actor-critic reinforcement learning agents and differ more in their calculations/value estimations rather than architecture. To leverage each model, at each time step (each trading day), we evaluate each stock ticker from our watch list and have each model make a decision. Once we have a decision (buy, do nothing, sell) from each model for a given stock ticker, we use majority voting to determine which action to take. Once we have done this, we take the mean quantity of all models that voted this decision as our trade quantity. 
 
+# Navigating the Repository & running the code
+
+The "stock_trader_bot_Git.py" file runs the stock trader bot. The three RL models leveraged in the .py file are built & trained by the three .py files in the "Model Trainer Files" folder. Once these are trained and saved to a location that the .py file can access, the .py file can be run. The API keys and twitter account both need to be entered in the necessary locations in the "stock_trader_bot_Git.py" file as well in order to run.
 
 # Why leverage RL for Stock Trading?
 
