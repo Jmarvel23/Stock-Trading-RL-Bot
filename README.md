@@ -9,15 +9,86 @@ This project highlights how to leverage the FinRL Python package to build 3 type
 
 The stock market is one of the best tools for both wealth growth and preservation. Leveraging RL to do this both takes human emotion out of the equation, but also ensures that our portfolio is constantly being re-evaluated based on the current market conditions following a time-proven, consistent policy.
 
+# Code Highlights Below:
+## Ensemble/Majority Voting Strategy
 
-# Ensemble/Majority Voting Strategy
+These functions take the decision and quantity from each RL model for a given stock ticker and, based on majority voting, executes a trade.
 
 ``` Python
+def calc_act(i_list):
+    counter = Counter(i_list)
+    if counter[1] >= 2:
+        return 1
+    elif counter[-1] >= 2:
+        return -1
+    else :
+        return 0
+
+def map_act(num):
+    n_list = [-1, 0, 1]
+    t_list = ["sell", "hold", "buy"]
+    index = n_list.index(num)
+    return t_list[index]
+
+def act(act_list, transact_list, Ticker):
+    action = calc_act(act_list)
+
+    if action == 0:
+        print('do nothing')
+    #     do nothing
+    else:
+        index = [i for i, e in enumerate(act_list) if e == action]
+        quantity = round(np.average([transact_list[i] for i in index]))
+
+        action_text = map_act(action)
+
+        try:
+            alpaca_api.submit_order(symbol=Ticker,
+                                    qty=quantity,
+                                    side=action_text,
+                                    type="market",
+                                    time_in_force="day")
+            print(action_text, quantity, Ticker, 'executed')
+        except Exception as ex:
+            print(ex)
 
 ```
 
+## Create a Watch List Based on Tweets
 
-## Future Developments
+The below functions pull tweets from a particular twitter user, scrapes for stock ticker symbols in those tweets, and creates a watch list comprised of them.
+
+``` Python
+################# Every time he tweets about a stock, add it to the list. Keep list distinct - Finished
+
+def Extract_Tickers(tweet):
+  Tickers = re.findall(r'[$][A-Za-z][\S]*', tweet)
+  Tickers = [re.sub('[$]', '', ticker) for ticker in Tickers]
+  return Tickers
+
+def Pull_Tweets():
+    # Pull tweets
+    # select twitter user below. a function could be created to call this function for multiple twitter users and append the ticker lists together
+    new_tweets = twitter_api.user_timeline(screen_name = ,count=200)
+
+    # only look at tweets that have a ticker symbol in them
+    reg = re.compile("[$][A-Za-z][\S]*")
+    stock_tweets = [tweet.text for tweet in new_tweets if bool(re.search(reg, tweet.text))]
+    return stock_tweets
+
+def maintain_Tweets(Tickers):
+    # maintain a distinct list of all the tickers
+    stock_tweets = Pull_Tweets()
+    for tweet in stock_tweets:
+        tics = Extract_Tickers(tweet)
+        for tic in tics:
+            if tic.isalpha():
+                Tickers.append(tic.upper())
+    Tickers = list(set(Tickers))
+    return Tickers
+```
+
+# Future Developments
 
 1) Build out these same models from scratch, rather than leveraging FinRL
   a) Build the environment to read current holdings and past trades from the Alpaca API rather than          storing history
